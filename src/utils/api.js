@@ -19,6 +19,8 @@ const request = async(options, showLoading = true) => {
 
   // 拼接url
   options.url = host + '/' + options.url;
+  console.log(options)
+  
   // 调用小程序的 request 方法
   let response = await wepy.request(options)
   console.log(response)
@@ -64,7 +66,83 @@ const login = async (params = {}) => {
   return authResponse
 }
 
+// 刷新token
+const refreshToken = async (accessToken) => {
+    let refreshResponse = await request({
+        url: 'authorizations/current',
+        method: 'PUT',
+        header: {
+            'Authorization': 'Bearer ' + accessToken
+        }
+    })
+
+    if(refreshResponse.statusCode === 200){
+        wepy.setStorageSync('access_token', refreshResponse.data.access_token)
+        wepy.setStorageSync('access_token_expired_at', new Date().getTime() + refreshResponse.data.expires_in * 1000)
+    }
+
+    return refreshResponse
+}
+
+// 获取token
+const getToken = async (options) => {
+    let accessToken = wepy.getStorageSync('access_token')
+    let expiredAt = wepy.getStorageSync('access_token_expired_at')
+
+    if(accessToken && new Date().getTime() > expiredAt){
+        let refreshResponse = await refreshToken(accessToken)
+        if(refreshResponse.statusCode === 200){
+            accessToken = refreshResponse.data.access_token
+        }else{
+            let authResponse = await login()
+            if(authResponse.statusCode === 201){
+                accessToken = authResponse.data.access_token
+            }
+        }
+    }
+
+    return accessToken
+}
+
+// 带身份认证的请求
+const authRequest = async (options, showLoading = true) => {
+    if(typeof options === 'string'){
+        options = {
+            url: options
+        }
+    }
+
+    let accessToken = await getToken()
+
+    let header = options.header || {}
+    header.Authorization = 'Bearer ' + accessToken
+    options.header = header
+
+    return request(options, showLoading)
+}
+
+// 退出登录
+const logout = async (params = []) => {
+    let accessToken = wepy.getStorageSync('access_token')
+    let logoutResponse = await request({
+        url: 'authorizations/current',
+        method: 'DELETE',
+        header: {
+            'Authorization' : 'Bearer ' + accessToken
+        }
+    })
+
+    if(logoutResponse.statusCode === 204){
+        wepy.clearStorage()
+    }
+
+    return logoutResponse
+}
+
 export default {
   request,
-  login
+  authRequest,
+  refreshToken,
+  login,
+  logout
 }
