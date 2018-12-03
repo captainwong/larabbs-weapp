@@ -34,7 +34,7 @@ const request = async(options, showLoading = true) => {
   if(response.statusCode === 500){
     wepy.showModal({
       title: '提示',
-      content: '服务器错误(500)，请联系管理员或重试'
+      content: '服务器错误，请联系管理员或重试: 500 ' + response.data.message
     })
   }
 

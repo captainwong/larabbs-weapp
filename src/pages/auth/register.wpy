@@ -63,7 +63,16 @@
             captchaModalHidden: true,
             captchaValue: null,
             captcha: {},
-            errors: {}
+            errors: {},
+            verificationCode: {}
+        }
+
+        resetRegister(){
+            this.captchaModalHidden = true
+            this.phoneDisabled = false
+            this.captcha = {}
+            this.verificationCode = {}
+            this.errors = {}
         }
 
         async getCaptchaCode() {
@@ -120,6 +129,59 @@
 
             async tapCaptchaCode(){
                 this.getCaptchaCode()
+            },
+
+            async sendVerificationCode(){
+                if(!this.captchaValue){
+                    this.errors.captchaValue = ['请输入图片验证码']
+                    return false
+                }
+
+                if(new Date().getTime() > this.captcha.expiredAt){
+                    wepy.showModal({
+                        title: '验证码已过期',
+                        icon: 'none',
+                        duration: 2000
+                    })
+                    this.resetRegister()
+                    return false
+                }
+
+                try{
+                    let codeResponse = await api.request({
+                        url: 'verificationCodes',
+                        method: 'POST',
+                        data: {
+                            captcha_key: this.captcha.key,
+                            captcha_code: this.captchaValue
+                        }
+                    })
+
+                    if(codeResponse.statusCode === 401){
+                        this.errors.captchaValue = ['图片验证码错误']
+                        this.$apply()
+                        await this.getCaptchaCode()
+                        return false
+                    }
+
+                    if(codeResponse.statusCode === 201){
+                        this.verificationCode = {
+                            key: codeResponse.data.key,
+                            expiredAt: Date.parse(codeResponse.data.expired_at)
+                        }
+
+                        this.captchaModalHidden = true
+                        this.phoneDisabled = true
+                        this.errors = {}
+                        this.$apply()
+                    }
+                }catch(err){
+                    console.log(err)
+                    wepy.showModal({
+                        title: '提示',
+                        content: '服务器错误，请联系管理员：' + err
+                    })
+                }
             }
         }
     }

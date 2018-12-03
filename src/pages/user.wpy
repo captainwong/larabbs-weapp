@@ -52,7 +52,7 @@ export default class User extends wepy.page {
                 console.log(err)
                 wepy.showModal({
                     title: '提示',
-                    content: '服务器错误，请联系管理员或重试'    
+                    content: '服务器错误，请联系管理员或重试: ' + err    
                 })
             }
       }
