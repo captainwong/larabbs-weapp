@@ -1,5 +1,6 @@
 import wepy from 'wepy'
 
+// 显示服务器错误
 const showServerError = (err) => {
     console.log(err)
     wepy.showModal({
@@ -147,11 +148,27 @@ const logout = async (params = []) => {
     return logoutResponse
 }
 
+// 上传文件
+const uploadFile = async (options = {}) => {
+    wepy.showLoading({title: '上传中'})
+    let accessToken = await getToken()
+    options.url = host + '/' + options.url
+    let header = options.header || {}
+    header.Authorization = 'Bearer ' + accessToken
+    options.header = header
+
+    let response = await wepy.uploadFile(options)
+    wepy.hideLoading()
+
+    return response
+}
+
 export default {
     showServerError,
     request,
     authRequest,
     refreshToken,
     login,
-    logout
+    logout,
+    uploadFile
 }
