@@ -39,6 +39,12 @@ export default class UserIndex extends wepy.page {
     onReachBottom () {
         this.$invoke('topiclist', 'loadmore')
     }
+
+    onShow() {
+        this.$parent.checkRefreshPages(this.getCurrentPages().pop().route, () => {
+            this.$invoke('topiclist', 'reload')
+        })
+    }
 }
 </script>
 
