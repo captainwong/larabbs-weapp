@@ -83,6 +83,7 @@ export default class TopicShow extends wepy.page {
     }
 
     onLoad(options) {
+        console.log('options:\n' + options)
         this.getTopic(options.id)
     }
 }

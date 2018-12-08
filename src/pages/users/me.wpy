@@ -54,7 +54,7 @@
                 </navigator>
 
                 <!-- 我的话题 -->
-                <navigator class="weui-cell weui-cell_access" url="">
+                <navigator class="weui-cell weui-cell_access" url="{{ user ? '/pages/topics/userIndex?user_id=' + user.id : '' }}">
                     <view class="weui-cell__bd" url="">
                         <view class="weui-cell__bd">我的话题</view>
                     </view>
