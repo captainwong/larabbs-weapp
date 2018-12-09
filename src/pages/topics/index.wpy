@@ -82,6 +82,8 @@
 import wepy from 'wepy'
 import api from '@/utils/api'
 import topicList from '@/components/topicList'
+import unreadCount from '@/mixins/unreadCount'
+
 
 export default class TopicIndex extends wepy.page {
     config = {
@@ -105,6 +107,8 @@ export default class TopicIndex extends wepy.page {
             return this.currentCategory.id || 0
         }
     }
+
+    mixins = [unreadCount]
 
     methods = {
         toggle() {

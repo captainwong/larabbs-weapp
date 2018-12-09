@@ -50,7 +50,7 @@ export default class extends wepy.app {
             'pages/replies/index',
             'pages/replies/userIndex',
             'pages/replies/create',
-            
+
         ],
         window: {
             backgroundTextStyle: 'light',
@@ -84,10 +84,16 @@ export default class extends wepy.app {
         this.use('promisify');
     }
 
-    onLaunch() {}
+    onLaunch() {
+        this.updateUnreadCount()
+        setInterval(() => {
+            this.updateUnreadCount()
+        }, 60000)
+    }
 
     globalData = {
-        refreshPages: []
+        refreshPages: [],
+        unreadCount: 0
     }
 
     checkRefreshPages(route, callback){
@@ -120,6 +126,15 @@ export default class extends wepy.app {
         }
 
         return user
+    }
+
+    async updateUnreadCount() {
+        if(!this.checkLogin()){return;}
+
+        let notificationResponse = await api.authRequest('user/notifications/stats', false)
+        if(notificationResponse.statusCode === 200){
+            this.globalData.unreadCount = notificationResponse.data.unread_count
+        }
     }
 
     checkLogin() {
