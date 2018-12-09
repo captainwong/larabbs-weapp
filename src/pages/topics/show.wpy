@@ -110,7 +110,7 @@ export default class TopicShow extends wepy.page {
             if(!this.topic || !this.user){
                 return false
             }
-            return this.user.id === this.topic.user.id
+            return (this.user.id === this.topic.user.id) || this.$parent.can('manage_contents')
         }
     }
 

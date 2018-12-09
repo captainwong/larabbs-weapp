@@ -51,7 +51,7 @@ export default class extends wepy.app {
             'pages/replies/userIndex',
             'pages/replies/create',
             'pages/notifications/index',
-            
+
         ],
         window: {
             backgroundTextStyle: 'light',
@@ -90,6 +90,8 @@ export default class extends wepy.app {
         setInterval(() => {
             this.updateUnreadCount()
         }, 60000)
+
+        this.getPermissions()
     }
 
     globalData = {
@@ -140,6 +142,37 @@ export default class extends wepy.app {
 
     checkLogin() {
         return (wepy.getStorageSync('access_token') !== '')
+    }
+
+    async getPermissions() {
+        let permissions = []
+
+        if(!this.checkLogin()){
+            return permissions;
+        }
+
+        try {
+            let permissionsResponse = await api.authRequest('user/permissions', false)
+            if(permissionsResponse.statusCode === 200){
+                permissions = permissionsResponse.data.data;
+                wepy.setStorageSync('perms', permissions)
+            }
+        }catch(err){
+            api.showServerError(err)
+        }
+
+        return permissions;
+    }
+
+    can(targetPermission){
+        if(!this.checkLogin()){return false;}
+
+        let permissions = wepy.getStorageSync('perms') || []
+        if(permissions.find(permission => permission.name === targetPermission)){
+            return true;
+        }
+
+        return false;
     }
 }
 </script>

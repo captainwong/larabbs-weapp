@@ -101,6 +101,7 @@ methods = {
 
             // 201 正确登录，返回上一页
             if (authResponse.statusCode === 201) {
+                this.$parent.getPermissions()
                 wepy.navigateBack()
             }
         } catch (err) {
@@ -114,6 +115,7 @@ async onShow() {
     try {
         let authResponse = await api.login()
         if (authResponse.statusCode === 201) {
+            this.$parent.getPermissions()
             wepy.navigateBack()
         }
     } catch (err) {
